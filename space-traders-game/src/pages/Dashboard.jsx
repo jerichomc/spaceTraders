@@ -1,5 +1,5 @@
 import { useState} from 'react';
-import { getAgent, getContracts } from '../services/spacetraders.js';
+import { getAgent, getContracts, acceptContract } from '../services/spacetraders.js';
 
 function Dashboard() {
   const [token, setToken] = useState('');
@@ -21,6 +21,7 @@ function Dashboard() {
       }
 
       setAgentData(data.data);
+      // console.log("Agent Data:", data.data);
     } catch (error) {
       console.error("Error fetching agent data:", error);
       alert("Failed to load agent data. Please check your token and try again.");
@@ -36,9 +37,28 @@ function Dashboard() {
         return;
       } 
       setContractsData(data.data);
+      // console.log("Contracts Data:", data.data);
     } catch (error) {
       console.error("Error fetching contracts data:", error);
       alert("Failed to load contracts data. Please check your token and try again.");
+    }
+  }
+
+  async function handleAcceptContract(contractId){
+    try {
+      const data = await acceptContract(contractId);
+
+      if (data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+
+      alert(`Contract} accepted successfully!`);
+      handleLoadAgent();
+      handleLoadContracts();
+    } catch (error) {
+      console.error("Error accepting contract:", error);
+      alert("Failed to accept contract. Please check your token and try again.");
     }
   }
 
@@ -56,6 +76,7 @@ function Dashboard() {
       <button onClick={handleSaveToken}>Save Token</button>
       <button onClick={handleLoadAgent}>Load Agent Data</button>
       <button onClick={handleLoadContracts}>Load Contracts</button>
+      <button onClick={() => handleAcceptContract(contractsData[0]?.id)}>Accept Contract</button>
 
       {agentData && (
         <div id="agent-info">

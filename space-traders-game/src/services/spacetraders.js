@@ -24,4 +24,19 @@ async function getContracts(){
     return data;
 }
 
-export { getAgent, getContracts };
+async function acceptContract(contractId){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/my/contracts/${contractId}/accept`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract };
