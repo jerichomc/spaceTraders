@@ -12,4 +12,16 @@ async function getAgent(){
     return data;
 }
 
-export { getAgent };
+async function getContracts(){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/my/contracts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts };
