@@ -53,4 +53,17 @@ async function getShipyards(systemSymbol){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract, getShipyards };
+async function selectShipyard(systemSymbol, waypointSymbol){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/systems/${systemSymbol}/waypoints/${waypointSymbol}/shipyard`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard };

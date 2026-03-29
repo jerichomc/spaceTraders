@@ -1,20 +1,29 @@
-import { useState} from 'react';
-import { getAgent, getContracts, acceptContract, getShipyards } from '../services/spacetraders.js';
+import { useState } from 'react';
+import {
+  getAgent,
+  getContracts,
+  acceptContract,
+  getShipyards,
+  selectShipyard,
+} from '../services/spacetraders.js';
 
 function Dashboard() {
   const [token, setToken] = useState('');
   const [agentData, setAgentData] = useState(null);
   const [contractsData, setContractsData] = useState(null);
   const [shipyardsData, setShipyardsData] = useState(null);
+  const [selectedShipyard, setSelectedShipyard] = useState(null);
 
-  const systemSymbol = agentData ? agentData.headquarters.split("-").slice(0,2).join("-") : "";
+  const systemSymbol = agentData
+    ? agentData.headquarters.split('-').slice(0, 2).join('-')
+    : '';
 
-  function handleSaveToken(){
-    localStorage.setItem("agentToken", token);
-    alert("Token Saved!");
+  function handleSaveToken() {
+    localStorage.setItem('agentToken', token);
+    alert('Token Saved!');
   }
 
-  async function handleLoadAgent(){
+  async function handleLoadAgent() {
     try {
       const data = await getAgent();
 
@@ -24,30 +33,30 @@ function Dashboard() {
       }
 
       setAgentData(data.data);
-      console.log("Agent Data:", data.data);
+      console.log('Agent Data:', data.data);
     } catch (error) {
-      console.error("Error fetching agent data:", error);
-      alert("Failed to load agent data. Please check your token and try again.");
+      console.error('Error fetching agent data:', error);
+      alert('Failed to load agent data. Please check your token and try again.');
     }
   }
 
-  async function handleLoadContracts(){
+  async function handleLoadContracts() {
     try {
       const data = await getContracts();
 
       if (data.error) {
         alert(`Error: ${data.error.message}`);
         return;
-      } 
+      }
+
       setContractsData(data.data);
-      // console.log("Contracts Data:", data.data);
     } catch (error) {
-      console.error("Error fetching contracts data:", error);
-      alert("Failed to load contracts data. Please check your token and try again.");
+      console.error('Error fetching contracts data:', error);
+      alert('Failed to load contracts data. Please check your token and try again.');
     }
   }
 
-  async function handleAcceptContract(contractId){
+  async function handleAcceptContract(contractId) {
     try {
       const data = await acceptContract(contractId);
 
@@ -56,16 +65,16 @@ function Dashboard() {
         return;
       }
 
-      alert(`Contract} accepted successfully!`);
+      alert('Contract accepted successfully!');
       handleLoadAgent();
       handleLoadContracts();
     } catch (error) {
-      console.error("Error accepting contract:", error);
-      alert("Failed to accept contract. Please check your token and try again.");
+      console.error('Error accepting contract:', error);
+      alert('Failed to accept contract. Please check your token and try again.');
     }
   }
 
-  async function handleLoadShipyards(systemSymbol){
+  async function handleLoadShipyards(systemSymbol) {
     try {
       const data = await getShipyards(systemSymbol);
 
@@ -73,10 +82,29 @@ function Dashboard() {
         alert(`Error: ${data.error.message}`);
         return;
       }
+
       setShipyardsData(data.data);
+      setSelectedShipyard(null);
     } catch (error) {
-      console.error("Error fetching shipyards data:", error);
-      alert("Failed to load shipyards data. Please check your token and try again.");
+      console.error('Error fetching shipyards data:', error);
+      alert('Failed to load shipyards data. Please check your token and try again.');
+    }
+  }
+
+  async function handleSelectShipyard(systemSymbol, waypointSymbol) {
+    try {
+      const data = await selectShipyard(systemSymbol, waypointSymbol);
+
+      if (data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+
+      console.log('Selected shipyard data:', data.data);
+      setSelectedShipyard(data.data);
+    } catch (error) {
+      console.error('Error fetching shipyard data:', error);
+      alert('Failed to load shipyard data. Please check your token and try again.');
     }
   }
 
@@ -85,16 +113,19 @@ function Dashboard() {
       <h1>SpaceTraders Fleet Commander</h1>
       <p>Connect your agent to begin.</p>
 
-      <input type="text"
-      placeholder="Paste your agent token"
-      value={token}
-      onChange={(event) => setToken(event.target.value)}>
-      </input>
+      <input
+        type="text"
+        placeholder="Paste your agent token"
+        value={token}
+        onChange={(event) => setToken(event.target.value)}
+      />
 
       <button onClick={handleSaveToken}>Save Token</button>
       <button onClick={handleLoadAgent}>Load Agent Data</button>
       <button onClick={handleLoadContracts}>Load Contracts</button>
-      <button onClick={() => handleAcceptContract(contractsData[0]?.id)}>Accept Contract</button>
+      <button onClick={() => handleAcceptContract(contractsData?.[0]?.id)} disabled={!contractsData?.length}>
+        Accept Contract
+      </button>
       <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
         Load Shipyards
       </button>
@@ -107,63 +138,82 @@ function Dashboard() {
           <p>Credits: {agentData.credits}</p>
           <p>Starting Faction: {agentData.startingFaction}</p>
         </div>
-        
       )}
 
       {contractsData && (
-  <div>
-    <h2>Contracts</h2>
+        <div>
+          <h2>Contracts</h2>
 
-    {contractsData.length === 0 ? (
-      <p>No contracts found.</p>
-    ) : (
-      contractsData.map((contract) => (
-        <div key={contract.id}>
-          <p>Contract ID: {contract.id}</p>
-          <p>Faction: {contract.factionSymbol}</p>
-          <p>Accepted: {contract.accepted ? "Yes" : "No"}</p>
-          <p>Fulfilled: {contract.fulfilled ? "Yes" : "No"}</p>
-          <p>Deadline: {contract.terms.deadline}</p>
-          <p>Payment on accept: {contract.terms.payment.onAccepted}</p>
-          <p>Payment on fulfill: {contract.terms.payment.onFulfilled}</p>
+          {contractsData.length === 0 ? (
+            <p>No contracts found.</p>
+          ) : (
+            contractsData.map((contract) => (
+              <div key={contract.id}>
+                <p>Contract ID: {contract.id}</p>
+                <p>Faction: {contract.factionSymbol}</p>
+                <p>Accepted: {contract.accepted ? 'Yes' : 'No'}</p>
+                <p>Fulfilled: {contract.fulfilled ? 'Yes' : 'No'}</p>
+                <p>Deadline: {contract.terms.deadline}</p>
+                <p>Payment on accept: {contract.terms.payment.onAccepted}</p>
+                <p>Payment on fulfill: {contract.terms.payment.onFulfilled}</p>
 
-          <h3>Deliverables</h3>
-          {contract.terms.deliver.map((item) => (
-            <div key={`${contract.id}-${item.tradeSymbol}`}>
-              <p>Trade Symbol: {item.tradeSymbol}</p>
-              <p>Destination: {item.destinationSymbol}</p>
-              <p>Units Required: {item.unitsRequired}</p>
-              <p>Units Fulfilled: {item.unitsFulfilled}</p>
-            </div>
-          ))}
+                <h3>Deliverables</h3>
+                {contract.terms.deliver.map((item) => (
+                  <div key={`${contract.id}-${item.tradeSymbol}`}>
+                    <p>Trade Symbol: {item.tradeSymbol}</p>
+                    <p>Destination: {item.destinationSymbol}</p>
+                    <p>Units Required: {item.unitsRequired}</p>
+                    <p>Units Fulfilled: {item.unitsFulfilled}</p>
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
         </div>
-      ))
-    )}
-  </div>
-)}
-      {shipyardsData && (
-  <div>
-    <h2>Shipyards</h2>
+      )}
 
-    {shipyardsData.length === 0 ? (
-      <p>No shipyards found in this system.</p>
-    ) : (
-      shipyardsData.map((shipyard) => (
-        <div key={shipyard.symbol}>
-          <p>Symbol: {shipyard.symbol}</p>
-          <p>Type: {shipyard.type}</p>
-          <p>X: {shipyard.x}</p>
-          <p>Y: {shipyard.y}</p>
+      {selectedShipyard ? (
+        <div>
+          <h2>Selected Shipyard</h2>
+          <p>Symbol: {selectedShipyard.symbol}</p>
+          <p>Faction: {selectedShipyard.factionSymbol || 'Unknown'}</p>
+
+          <button onClick={() => setSelectedShipyard(null)}>Back to Shipyards</button>
+
+          <h3>Ships Available</h3>
+          {selectedShipyard.ships && selectedShipyard.ships.length > 0 ? (
+            selectedShipyard.ships.map((ship) => (
+              <div key={ship.type}>
+                <p>Type: {ship.type}</p>
+                <p>Name: {ship.name}</p>
+                <p>Purchase Price: {ship.purchasePrice}</p>
+              </div>
+            ))
+          ) : (
+            <p>No ship data available at this shipyard.</p>
+          )}
         </div>
-      ))
-    )}
-  </div>
-)}
-
-
+      ) : (
+        shipyardsData && (
+          <div>
+            <h2>Shipyards</h2>
+            {shipyardsData.length === 0 ? (
+              <p>No shipyards found in this system.</p>
+            ) : (
+              shipyardsData.map((shipyard) => (
+                <div key={shipyard.symbol}>
+                  <p>Symbol: {shipyard.symbol}</p>
+                  <p>Type: {shipyard.type}</p>
+                  <button onClick={() => handleSelectShipyard(systemSymbol, shipyard.symbol)}>
+                    View Shipyard
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        )
+      )}
     </div>
-    
-    
   );
 }
 
