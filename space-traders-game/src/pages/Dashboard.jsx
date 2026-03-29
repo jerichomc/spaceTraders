@@ -1,10 +1,13 @@
 import { useState} from 'react';
-import { getAgent, getContracts, acceptContract } from '../services/spacetraders.js';
+import { getAgent, getContracts, acceptContract, getShipyards } from '../services/spacetraders.js';
 
 function Dashboard() {
   const [token, setToken] = useState('');
   const [agentData, setAgentData] = useState(null);
   const [contractsData, setContractsData] = useState(null);
+  const [shipyardsData, setShipyardsData] = useState(null);
+
+  const systemSymbol = agentData ? agentData.headquarters.split("-").slice(0,2).join("-") : "";
 
   function handleSaveToken(){
     localStorage.setItem("agentToken", token);
@@ -21,7 +24,7 @@ function Dashboard() {
       }
 
       setAgentData(data.data);
-      // console.log("Agent Data:", data.data);
+      console.log("Agent Data:", data.data);
     } catch (error) {
       console.error("Error fetching agent data:", error);
       alert("Failed to load agent data. Please check your token and try again.");
@@ -62,6 +65,21 @@ function Dashboard() {
     }
   }
 
+  async function handleLoadShipyards(systemSymbol){
+    try {
+      const data = await getShipyards(systemSymbol);
+
+      if (data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+      setShipyardsData(data.data);
+    } catch (error) {
+      console.error("Error fetching shipyards data:", error);
+      alert("Failed to load shipyards data. Please check your token and try again.");
+    }
+  }
+
   return (
     <div>
       <h1>SpaceTraders Fleet Commander</h1>
@@ -77,6 +95,9 @@ function Dashboard() {
       <button onClick={handleLoadAgent}>Load Agent Data</button>
       <button onClick={handleLoadContracts}>Load Contracts</button>
       <button onClick={() => handleAcceptContract(contractsData[0]?.id)}>Accept Contract</button>
+      <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
+        Load Shipyards
+      </button>
 
       {agentData && (
         <div id="agent-info">
@@ -120,6 +141,25 @@ function Dashboard() {
     )}
   </div>
 )}
+      {shipyardsData && (
+  <div>
+    <h2>Shipyards</h2>
+
+    {shipyardsData.length === 0 ? (
+      <p>No shipyards found in this system.</p>
+    ) : (
+      shipyardsData.map((shipyard) => (
+        <div key={shipyard.symbol}>
+          <p>Symbol: {shipyard.symbol}</p>
+          <p>Type: {shipyard.type}</p>
+          <p>X: {shipyard.x}</p>
+          <p>Y: {shipyard.y}</p>
+        </div>
+      ))
+    )}
+  </div>
+)}
+
 
     </div>
     

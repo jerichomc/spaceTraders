@@ -39,4 +39,18 @@ async function acceptContract(contractId){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract };
+async function getShipyards(systemSymbol){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/systems/${systemSymbol}/waypoints?traits=SHIPYARD`, {
+        method: 'GET',
+        headers: {
+            
+            Authorization: `Bearer ${token}`,
+        }
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract, getShipyards };
