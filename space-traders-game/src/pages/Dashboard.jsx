@@ -109,11 +109,12 @@ function Dashboard() {
   }
 
   return (
-    <div>
+    <div className="dashboard">
       <h1>SpaceTraders Fleet Commander</h1>
       <p>Connect your agent to begin.</p>
 
-      <input
+      <div className="toolbar">
+        <input
         type="text"
         placeholder="Paste your agent token"
         value={token}
@@ -129,9 +130,11 @@ function Dashboard() {
       <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
         Load Shipyards
       </button>
+      </div>
+      
 
       {agentData && (
-        <div id="agent-info">
+        <div id="agent-info" className="panel">
           <h2>Agent Information</h2>
           <p>Symbol: {agentData.symbol}</p>
           <p>Headquarters: {agentData.headquarters}</p>
@@ -141,7 +144,7 @@ function Dashboard() {
       )}
 
       {contractsData && (
-        <div>
+        <div className="panel">
           <h2>Contracts</h2>
 
           {contractsData.length === 0 ? (
@@ -173,7 +176,7 @@ function Dashboard() {
       )}
 
       {selectedShipyard ? (
-        <div>
+        <div className="panel">
           <h2>Selected Shipyard</h2>
           <p>Symbol: {selectedShipyard.symbol}</p>
           <p>Faction: {selectedShipyard.factionSymbol || 'Unknown'}</p>
@@ -195,7 +198,7 @@ function Dashboard() {
         </div>
       ) : (
         shipyardsData && (
-          <div>
+          <div className="panel">
             <h2>Shipyards</h2>
             {shipyardsData.length === 0 ? (
               <p>No shipyards found in this system.</p>
