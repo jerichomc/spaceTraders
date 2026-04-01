@@ -66,4 +66,22 @@ async function selectShipyard(systemSymbol, waypointSymbol){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard };
+async function purchaseShip(shipType, waypointSymbol) {
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/my/ships`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            shipType,
+            waypointSymbol
+        })
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip };

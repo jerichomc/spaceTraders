@@ -5,6 +5,7 @@ import {
   acceptContract,
   getShipyards,
   selectShipyard,
+  purchaseShip,
 } from '../services/spacetraders.js';
 
 function Dashboard() {
@@ -108,6 +109,22 @@ function Dashboard() {
     }
   }
 
+  async function handlePurchaseShip(shipType, waypointSymbol) {
+    try {
+      const data = await purchaseShip(shipType, waypointSymbol);
+
+      if (data.error){
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+      alert('Ship purchased successfully!');
+      handleLoadAgent();
+    } catch (error){
+      console.error('Error purchasing ship:', error);
+      alert('Failed to purchase ship. Please check your token and try again.');
+    }
+  }
+
   return (
     <div className="dashboard">
       <h1>SpaceTraders Fleet Commander</h1>
@@ -190,6 +207,9 @@ function Dashboard() {
                 <p>Type: {ship.type}</p>
                 <p>Name: {ship.name}</p>
                 <p>Purchase Price: {ship.purchasePrice}</p>
+                <button onClick={() => handlePurchaseShip(ship.type, selectedShipyard.symbol)}>
+                  Purchase Ship
+                </button>
               </div>
             ))
           ) : (
