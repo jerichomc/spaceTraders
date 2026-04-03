@@ -7,6 +7,7 @@ import {
   selectShipyard,
   purchaseShip,
   getShips,
+  getEngineeredAsteroids,
 } from '../services/spacetraders.js';
 
 function Dashboard() {
@@ -16,6 +17,8 @@ function Dashboard() {
   const [shipyardsData, setShipyardsData] = useState(null);
   const [selectedShipyard, setSelectedShipyard] = useState(null);
   const [shipsData, setShipsData] = useState(null);
+  const [engineeredAsteroidsData, setEngineeredAsteroidsData] = useState(null);
+
 
   const systemSymbol = agentData
     ? agentData.headquarters.split('-').slice(0, 2).join('-')

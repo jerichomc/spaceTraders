@@ -98,4 +98,18 @@ async function getShips(){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip, getShips };
+async function getEngineeredAsteroids(systemSymbol){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/systems/${systemSymbol}/waypoints?type=ENGINEERED_ASTEROID`, {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        }
+    }
+    );
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip, getShips, getEngineeredAsteroids };
