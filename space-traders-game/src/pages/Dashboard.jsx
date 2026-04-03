@@ -6,6 +6,7 @@ import {
   getShipyards,
   selectShipyard,
   purchaseShip,
+  getShips,
 } from '../services/spacetraders.js';
 
 function Dashboard() {
@@ -14,6 +15,7 @@ function Dashboard() {
   const [contractsData, setContractsData] = useState(null);
   const [shipyardsData, setShipyardsData] = useState(null);
   const [selectedShipyard, setSelectedShipyard] = useState(null);
+  const [shipsData, setShipsData] = useState(null);
 
   const systemSymbol = agentData
     ? agentData.headquarters.split('-').slice(0, 2).join('-')
@@ -113,15 +115,34 @@ function Dashboard() {
     try {
       const data = await purchaseShip(shipType, waypointSymbol);
 
-      if (data.error){
+      if (data.error) {
         alert(`Error: ${data.error.message}`);
         return;
       }
+
       alert('Ship purchased successfully!');
       handleLoadAgent();
-    } catch (error){
+      handleLoadShips();
+    } catch (error) {
       console.error('Error purchasing ship:', error);
       alert('Failed to purchase ship. Please check your token and try again.');
+    }
+  }
+
+  async function handleLoadShips() {
+    try {
+      const data = await getShips();
+
+      if (data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+
+      console.log('Ships Data:', data.data);
+      setShipsData(data.data);
+    } catch (error) {
+      console.error('Error fetching ships data:', error);
+      alert('Failed to load ships data. Please check your token and try again.');
     }
   }
 
@@ -132,23 +153,32 @@ function Dashboard() {
 
       <div className="toolbar">
         <input
-        type="text"
-        placeholder="Paste your agent token"
-        value={token}
-        onChange={(event) => setToken(event.target.value)}
-      />
+          type="text"
+          placeholder="Paste your agent token"
+          value={token}
+          onChange={(event) => setToken(event.target.value)}
+        />
 
-      <button onClick={handleSaveToken}>Save Token</button>
-      <button onClick={handleLoadAgent}>Load Agent Data</button>
-      <button onClick={handleLoadContracts}>Load Contracts</button>
-      <button onClick={() => handleAcceptContract(contractsData?.[0]?.id)} disabled={!contractsData?.length}>
-        Accept Contract
-      </button>
-      <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
-        Load Shipyards
-      </button>
+        <button onClick={handleSaveToken}>Save Token</button>
+        <button
+          onClick={() => {
+            handleLoadAgent();
+            handleLoadShips();
+          }}
+        >
+          Load Agent Data
+        </button>
+        <button onClick={handleLoadContracts}>Load Contracts</button>
+        <button
+          onClick={() => handleAcceptContract(contractsData?.[0]?.id)}
+          disabled={!contractsData?.length}
+        >
+          Accept Contract
+        </button>
+        <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
+          Load Shipyards
+        </button>
       </div>
-      
 
       {agentData && (
         <div id="agent-info" className="panel">
@@ -157,6 +187,25 @@ function Dashboard() {
           <p>Headquarters: {agentData.headquarters}</p>
           <p>Credits: {agentData.credits}</p>
           <p>Starting Faction: {agentData.startingFaction}</p>
+        </div>
+      )}
+
+      {shipsData && (
+        <div className="panel">
+          <h2>Ships</h2>
+          {shipsData.length === 0 ? (
+            <p>No ships found.</p>
+          ) : (
+            shipsData.map((ship) => (
+              <div key={ship.symbol}>
+                <p>Ship Symbol: {ship.symbol}</p>
+                <p>Role: {ship.registration?.role}</p>
+                <p>Status: {ship.nav?.status}</p>
+                <p>System: {ship.nav?.systemSymbol}</p>
+                <p>Waypoint: {ship.nav?.waypointSymbol}</p>
+              </div>
+            ))
+          )}
         </div>
       )}
 
