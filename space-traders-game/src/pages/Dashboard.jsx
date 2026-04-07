@@ -8,6 +8,7 @@ import {
   purchaseShip,
   getShips,
   getEngineeredAsteroids,
+  orbitShip,
 } from '../services/spacetraders.js';
 
 function Dashboard() {
@@ -23,6 +24,8 @@ function Dashboard() {
   const systemSymbol = agentData
     ? agentData.headquarters.split('-').slice(0, 2).join('-')
     : '';
+
+  const miningShip = shipsData?.find((ship) => ship.registration?.role === 'EXCAVATOR'); // Find a mining ship in the fleet
 
   function handleSaveToken() {
     localStorage.setItem('agentToken', token);
@@ -163,6 +166,21 @@ function Dashboard() {
     }
   }
 
+  async function handleOrbitShip(shipSymbol) {
+    try {
+      const data = await orbitShip(shipSymbol);
+      if(data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+      alert('Ship is now orbiting!');
+      await handleLoadShips(); // Refresh ship data to show updated status
+    } catch (error) {
+      console.error('Error orbiting ship:', error);
+      alert('Failed to orbit ship. Please check your token and try again.');
+    }
+  }
+
   return (
     <div className="dashboard">
       <h1>SpaceTraders Fleet Commander</h1>
@@ -198,6 +216,9 @@ function Dashboard() {
         <button onClick={handleLoadEngineeredAsteroids} disabled={!systemSymbol}>
           Load Asteroids
         </button>
+        <button onClick={() => handleOrbitShip(miningShip.symbol)} disabled={!miningShip}>
+          Orbit Mining Ship
+        </button>
       </div>
 
       {agentData && (
@@ -218,7 +239,7 @@ function Dashboard() {
           ) : (
             shipsData.map((ship) => (
               <div key={ship.symbol}>
-                <p>Ship Symbol: {ship.symbol}</p>
+                <p><b>Ship Symbol:</b> {ship.symbol}</p>
                 <p>Role: {ship.registration?.role}</p>
                 <p>Status: {ship.nav?.status}</p>
                 <p>System: {ship.nav?.systemSymbol}</p>

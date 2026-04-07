@@ -112,4 +112,18 @@ async function getEngineeredAsteroids(systemSymbol){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip, getShips, getEngineeredAsteroids };
+async function orbitShip(shipSymbol){
+    const token = localStorage.getItem('agentToken'); //gets authorization token from local storage
+
+    const response = await fetch(`${BASE_URL}/my/ships/${shipSymbol}/orbit`, {
+        method: 'POST',
+        headers : {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        }, body: JSON.stringify({}) //sends an empty body as the API endpoint does not require any additional data
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip, getShips, getEngineeredAsteroids, orbitShip, };
