@@ -8,7 +8,8 @@ import {
   purchaseShip,
   getShips,
   getEngineeredAsteroids,
-  orbitShip,
+  orbitShip, 
+  navigateShip, 
 } from '../services/spacetraders.js';
 
 function Dashboard() {
@@ -26,6 +27,9 @@ function Dashboard() {
     : '';
 
   const miningShip = shipsData?.find((ship) => ship.registration?.role === 'EXCAVATOR'); // Find a mining ship in the fleet
+
+  const targetAsteroid = engineeredAsteroidsData?.[0]; //derived value change later
+
 
   function handleSaveToken() {
     localStorage.setItem('agentToken', token);
@@ -181,6 +185,22 @@ function Dashboard() {
     }
   }
 
+  async function handleNavigateShip(shipSymbol, destinationSymbol) {
+    try {
+      const data = await navigateShip(shipSymbol, destinationSymbol);
+      if(data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+      await handleLoadShips(); // Refresh ship data to show updated status
+      alert(`Ship is now navigating to ${destinationSymbol}!`);
+    } catch (error) {
+      console.error('Error navigating ship:', error);
+      alert('Failed to navigate ship. Please check your token and try again.');
+
+    }
+  }
+
   return (
     <div className="dashboard">
       <h1>SpaceTraders Fleet Commander</h1>
@@ -218,6 +238,9 @@ function Dashboard() {
         </button>
         <button onClick={() => handleOrbitShip(miningShip.symbol)} disabled={!miningShip}>
           Orbit Mining Ship
+        </button>
+        <button onClick={() => handleNavigateShip(miningShip.symbol, targetAsteroid.symbol)} disabled={!miningShip || !targetAsteroid}>
+          Navigate Mining Ship
         </button>
       </div>
 

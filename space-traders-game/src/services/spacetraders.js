@@ -126,4 +126,28 @@ async function orbitShip(shipSymbol){
     return data;
 }
 
-export { getAgent, getContracts, acceptContract, getShipyards, selectShipyard , purchaseShip, getShips, getEngineeredAsteroids, orbitShip, };
+async function navigateShip(shipSymbol, waypointSymbol){
+    const token = localStorage.getItem('agentToken');
+
+    const response = await fetch(`${BASE_URL}/my/ships/${shipSymbol}/navigate`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ waypointSymbol })
+    });
+    const data = await response.json();
+    return data;
+}
+
+export { getAgent,
+     getContracts,
+      acceptContract,
+       getShipyards,
+        selectShipyard ,
+         purchaseShip,
+          getShips,
+           getEngineeredAsteroids
+           , orbitShip,
+            navigateShip };
