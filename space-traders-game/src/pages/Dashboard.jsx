@@ -149,6 +149,20 @@ function Dashboard() {
     }
   }
 
+  async function handleLoadEngineeredAsteroids() {
+    try {
+      const data = await getEngineeredAsteroids(systemSymbol); //returns parsed JSON as data
+      if (data.error) {
+        alert(`Error: ${data.error.message}`);
+        return;
+      }
+      setEngineeredAsteroidsData(data.data); //sets the state of engineeredAsteroidsData to the data returned from the API call
+    } catch (error) {
+      console.error('Error fetching engineered asteroids data:', error);
+      alert('Failed to load engineered asteroids data. Please check your token and try again.');
+    }
+  }
+
   return (
     <div className="dashboard">
       <h1>SpaceTraders Fleet Commander</h1>
@@ -180,6 +194,9 @@ function Dashboard() {
         </button>
         <button onClick={() => handleLoadShipyards(systemSymbol)} disabled={!systemSymbol}>
           Load Shipyards
+        </button>
+        <button onClick={handleLoadEngineeredAsteroids} disabled={!systemSymbol}>
+          Load Asteroids
         </button>
       </div>
 
@@ -288,6 +305,24 @@ function Dashboard() {
           </div>
         )
       )}
+      {engineeredAsteroidsData && (
+        <div className="panel"> 
+          <h2>Engineered Asteroids</h2>
+          {engineeredAsteroidsData.length === 0 ? (
+            <p>No Asteroids found in this system.</p>
+          ) : (
+            engineeredAsteroidsData.map((asteroid) => (
+              <div key={asteroid.symbol}>
+                <p>Symbol: {asteroid.symbol}</p>
+                <p>Type: {asteroid.type}</p>
+                <p>Traits: {asteroid.traits?.map((trait) => trait.name).join(', ') || 'None listed'}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      
     </div>
   );
 }
